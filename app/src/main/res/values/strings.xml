@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PruebasNFCCardEmulation</string>
+    <string name="servicedesc">Servicio\n</string>
+    <string name="aiddescription">Servicio AID</string>
+</resources>
