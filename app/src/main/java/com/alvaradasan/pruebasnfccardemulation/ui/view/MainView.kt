@@ -38,7 +38,7 @@ fun MainView(navController: NavController?) {
             Button(onClick = { navController?.navigate("${Views.NFC_MAIN}") }) {
                 Text("NFC")
             }
-            Button(onClick = { navController?.navigate("${Views.BEAM_MAIN}") }) {
+            Button(onClick = { navController?.navigate("${Views.CARD_EMULATION_MAIN}") }) {
                 Text("Card Emulation")
             }
         }
