@@ -10,8 +10,8 @@ import com.alvaradasan.pruebasnfccardemulation.manager.CardEmulationManager
 import com.alvaradasan.pruebasnfccardemulation.manager.NfcManager
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 import com.alvaradasan.pruebasnfccardemulation.ui.view.NavigationView
-import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationMainViewModel
-import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationMainViewModelFactory
+import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationAntennaViewModel
+import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationAntennaViewModelFactory
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcMainViewModel
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcMainViewModelFactory
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcRWViewModel
@@ -33,14 +33,14 @@ class MainActivity : ComponentActivity() {
 
         val nfcMainViewModel: NfcMainViewModel by viewModels { NfcMainViewModelFactory(nfcManager) }
         val nfcRWViewModel: NfcRWViewModel by viewModels { NfcRWViewModelFactory(nfcManager) }
-        val cardEmulationMainViewModel : CardEmulationMainViewModel by viewModels { CardEmulationMainViewModelFactory(cardEmulationManager) }
+        val cardEmulationAntennaViewModel : CardEmulationAntennaViewModel by viewModels { CardEmulationAntennaViewModelFactory(cardEmulationManager) }
 
         setContent {
             PruebasNFCCardEmulationTheme {
                 NavigationView(
                     nfcMainViewModel = nfcMainViewModel,
                     nfcRWViewModel = nfcRWViewModel,
-                    cardEmulationMainViewModel = cardEmulationMainViewModel
+                    cardEmulationAntennaViewModel = cardEmulationAntennaViewModel
                 )
             }
         }
