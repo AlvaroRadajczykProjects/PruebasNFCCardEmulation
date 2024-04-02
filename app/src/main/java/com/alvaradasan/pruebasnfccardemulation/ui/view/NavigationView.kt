@@ -4,12 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.alvaradasan.pruebasnfccardemulation.ui.view.cardemulation.CardEmulationAntennaView
+import com.alvaradasan.pruebasnfccardemulation.ui.view.cardemulation.CardEmulationCardView
 import com.alvaradasan.pruebasnfccardemulation.ui.view.cardemulation.CardEmulationMainView
 import com.alvaradasan.pruebasnfccardemulation.ui.view.nfc.NfcFindInfoView
 import com.alvaradasan.pruebasnfccardemulation.ui.view.nfc.NfcInfoView
 import com.alvaradasan.pruebasnfccardemulation.ui.view.nfc.NfcMainView
 import com.alvaradasan.pruebasnfccardemulation.ui.view.nfc.NfcRWView
-import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationMainViewModel
+import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationAntennaViewModel
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcMainViewModel
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcRWViewModel
 
@@ -19,14 +21,16 @@ enum class Views {
     NFC_INFO,
     NFC_FIND_INFO,
     NFC_NDEF_READ,
-    BEAM_MAIN
+    CARD_EMULATION_MAIN,
+    CARD_EMULATION_CARD,
+    CARD_EMULATION_ANTENNA,
 }
 
 @Composable
 fun NavigationView(
     nfcMainViewModel: NfcMainViewModel,
     nfcRWViewModel: NfcRWViewModel,
-    cardEmulationMainViewModel: CardEmulationMainViewModel
+    cardEmulationAntennaViewModel: CardEmulationAntennaViewModel
 ) {
     val navController = rememberNavController()
 
@@ -43,6 +47,8 @@ fun NavigationView(
             NfcRWView(nfcRWViewModel, data = backStackEntry.arguments?.getString("data"))
         }
 
-        composable(Views.BEAM_MAIN.toString()) { CardEmulationMainView(cardEmulationMainViewModel) }
+        composable("${Views.CARD_EMULATION_MAIN}") { CardEmulationMainView(navController) }
+        composable("${Views.CARD_EMULATION_ANTENNA}") { CardEmulationAntennaView(cardEmulationAntennaViewModel) }
+        composable("${Views.CARD_EMULATION_CARD}") { CardEmulationCardView() }
     }
 }

@@ -40,14 +40,18 @@ class CardEmulationManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, 
             runCatching {
                 if(tag.techList.contains("android.nfc.tech.IsoDep")) {
                     val isoDep = IsoDep.get(tag)
-                    isoDep.connect()
-                    val response = isoDep.transceive(
-                        Utils.hexStringToByteArray("00A4040007A0000002471001"))
-                    val responseString = Utils.toHex(response)
-                    isoDep.close()
-                    resultStream.send(responseString)
-                    println(responseString)
-                } else throw Exception("No IsoDep available")
+                    if(!isoDep.isConnected) isoDep.connect()
+
+                    runCatching {
+                        val response = isoDep.transceive(Utils.hexStringToByteArray("00A4040007A0000002471001"))
+                        resultStream.send(String(response))
+                    }.onFailure {
+                        it.printStackTrace()
+                        resultStream.send(NfcManager.ERROR)
+                    }
+
+                    if(isoDep.isConnected) isoDep.close()
+                } else resultStream.send(NfcManager.ERROR)
             }.onFailure {
                 it.printStackTrace()
                 resultStream.send(NfcManager.ERROR)
