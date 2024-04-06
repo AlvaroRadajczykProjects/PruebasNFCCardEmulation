@@ -19,6 +19,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 
+/**
+ * Composables de la ventana principal de esta app
+ * Estos composables no tienen niguna implementación de funcionalidad NFC
+ */
+
 @Composable
 fun MainView(navController: NavController?) {
     Scaffold(

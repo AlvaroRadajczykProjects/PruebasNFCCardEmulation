@@ -29,9 +29,13 @@ import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationT
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEmulationAntennaViewModel
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcRWViewModel
 
+/**
+ * Composables de la ventana de la UI de la ventana modo lector antena de la emulacion de tarjeta
+ * Estos composables no tienen niguna implementación de funcionalidad NFC/APDU, sólo a partir de llamadas de su ViewModel
+ */
+
 @Composable
 fun CardEmulationAntennaView(cardEmulationAntennaViewModel: CardEmulationAntennaViewModel) {
-    var mutableData by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
     var dialogText by remember { mutableStateOf("") }
 
