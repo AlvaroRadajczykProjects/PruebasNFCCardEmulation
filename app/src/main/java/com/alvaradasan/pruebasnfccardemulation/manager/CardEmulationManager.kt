@@ -16,15 +16,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 class CardEmulationManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedRead: AtomicBoolean) {
 
     companion object {
+        //Utilizado para saber cuándo una operación ha dado problemas o ha funcionado bien
         val ERROR = "ERROR"
     }
 
+    /** Adaptador de antena que es capaz de leer etiquetas NFC */
     private val adapter : NfcAdapter
+    /** Flujo para poder utilizar la actividad de esta aplicación */
     private val activityFlow : Flow<Activity>
+    /** Booleano utilizado para no interferir en la gestión de lectura hecha por otros subprocesos */
     val requestedRead : AtomicBoolean
 
+    /** Utilizado para gestión de subprocesos en segundo plano */
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    /** Utilizado para enviar resultados de acciones a otros subprocesos */
     private var resultStream: Channel<String>
+    /** Utilizado apra enviar resultados de lectura a otros subprocesos */
     private var writeDataStream: Channel<String>
 
     init {
@@ -35,6 +42,10 @@ class CardEmulationManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, 
         this.requestedRead = requestedRead
     }
 
+    /**
+     * Callback utilizado para gestionar el envío de un comando simple en formato APDU y obtener la respuesta que devuelve la etiqueta
+     * NFC que soporta APDU
+     */
     private val establishConnectionCallback = NfcAdapter.ReaderCallback { tag ->
         coroutineScope.launch {
             runCatching {
@@ -59,11 +70,22 @@ class CardEmulationManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, 
         }
     }
 
+    /**
+     * Inicia la búsqueda de una etiqueta NFC que soporte APDU, y en caso de encontrarlo, llama a un callback que se encarga de enviar un
+     * simple comando en formato APDU, y devuelve la respuesta como cadena de texto
+     *
+     * @return [String]
+     */
     suspend fun startCommunication() : String {
         manageStartRead(establishConnectionCallback)
         return resultStream.receive()
     }
 
+    /**
+     * Inicia la búsqueda de una etiqueta NFC que soporte APDU, y en caso de encontrarla, llama a un callback pasado como argumento de tipo [NfcAdapter.ReaderCallback]
+     *
+     * @param callback Callback llamado en el caso de encontrar una etiqueta NFC que soporte APDU
+     */
     private suspend fun manageStartRead( callback: NfcAdapter.ReaderCallback ) {
         runCatching {
             activityFlow.collect {
@@ -87,6 +109,9 @@ class CardEmulationManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, 
         }
     }
 
+    /**
+     * Detiene la búsqueda de una etiqueta NFC que soporte APDU
+     */
     suspend fun manageStopRead() {
         activityFlow.collect {
             println("Stopped reading (NFC antenna)")

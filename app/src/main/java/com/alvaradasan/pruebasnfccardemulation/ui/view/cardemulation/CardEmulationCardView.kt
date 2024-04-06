@@ -26,6 +26,11 @@ import androidx.compose.ui.unit.sp
 import com.alvaradasan.pruebasnfccardemulation.MyHostApduService
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 
+/**
+ * Composables de la ventana de la UI de la ventana modo emulacion de tarjeta
+ * Estos composables no tienen niguna implementación de funcionalidad NFC/APDU
+ */
+
 @Composable
 fun CardEmulationCardView() {
     var mutableData by remember { mutableStateOf("") }

@@ -32,6 +32,11 @@ import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationT
 import com.alvaradasan.pruebasnfccardemulation.ui.view.Views
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcMainViewModel
 
+/**
+ * Composables de la UI de la ventana principal de NFC
+ * Estos composables no tienen niguna implementación de funcionalidad NFC, sólo de llamadas a partir de su UI
+ */
+
 @Composable
 fun NfcMainView(nfcMainViewModel: NfcMainViewModel, navController: NavController?) {
     val uiState by nfcMainViewModel.uiState.collectAsStateWithLifecycle()

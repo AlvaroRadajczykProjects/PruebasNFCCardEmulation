@@ -19,6 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 
+/**
+ * Composables de la ventana de la UI de la información obtenida de una etiqueta NFC
+ * Estos composables no tienen niguna implementación de funcionalidad NFC
+ */
+
 @Composable
 fun NfcInfoView(info: String?) {
     Scaffold(

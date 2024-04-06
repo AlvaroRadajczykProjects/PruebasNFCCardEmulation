@@ -27,6 +27,11 @@ import com.alvaradasan.pruebasnfccardemulation.manager.NfcManager
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcRWViewModel
 
+/**
+ * Composables de la UI de la ventana de NFC lectura/escritura de datos de la UI
+ * Estos composables no tienen niguna implementación de funcionalidad NFC, sólo de llamadas a partir de su UI
+ */
+
 @Composable
 fun NfcRWView(nfcRWViewModel: NfcRWViewModel, data: String?) {
     var mutableData by remember { mutableStateOf(data ?: "") }

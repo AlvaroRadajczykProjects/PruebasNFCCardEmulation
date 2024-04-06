@@ -6,27 +6,51 @@ import android.util.Log
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 
+/**
+ * Servicio que hereda de [HostApduService] y que implementa los métodos necesarios para que el dispositivo que ejecute esta
+ * aplicación pueda comportarse como una etiqueta NFC capaz de mantener una comunicación con el protocolo APDU
+ *
+ * @constructor Create empty constructor for MyHostApduService.
+ */
 class MyHostApduService : HostApduService() {
     companion object {
+        /** Cadena de texto que se enviará como reespuesta cuando una antena NFC que soporte APDU intente comunicarse con este dispositivo */
         var sendingContent : String = ""
     }
 
+    /**
+     * Modificación de onCreate para mostrar un mensaje en consola cuando este servicio se haya creado.
+     * Implementado para observar que este servicio se crea y se mantiene activo hasta que la comunicación entre
+     * etiqueta y antena se finaliza
+     */
     override fun onCreate() {
         super.onCreate()
         println("Se crea el servicio MyHostApduService")
     }
 
+    /**
+     * Modificación de onDestroy para mostrar un mensaje en consola cuando este servicio se haya destruido.
+     * Implementado para observar que este servicio se crea y se mantiene activo hasta que la comunicación entre
+     * etiqueta y antena se finaliza
+     */
     override fun onDestroy() {
         super.onDestroy()
         println("Se destruye el servicio MyHostApduService")
     }
 
+    /**
+     * Process Command Apdu.
+     *
+     * @param commandApdu
+     * @param extras
+     * @return [Byte]
+     */
     override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray {
-        println("LLEGA: ${Utils.toHex(commandApdu)}")
-
+        println("Mensaje en formmato APDU que llega de una antena NFC que soporta APDU: ${Utils.toHex(commandApdu)}")
+        println("Se responde con este mensaje: $sendingContent")
         return sendingContent.toByteArray()
 
-        //COMANDOS ESPECÍFICOS DEL PROTOCOLO APDU, NO ES NECESARIO UTILIZARLOS PARA UNA PRUEBA SIMPLE
+        //COMANDOS ESPECÍFICOS DEL PROTOCOLO APDU, NO UTILIZADOS EN ESTA RAMA
         /*if (commandApdu == null) return Utils.hexStringToByteArray(Utils.STATUS_FAILED)
 
         val hexCommandApdu = Utils.toHex(commandApdu)
@@ -41,6 +65,6 @@ class MyHostApduService : HostApduService() {
     }
 
     override fun onDeactivated(reason: Int) {
-        Log.d(Utils.TAG, "Deactivated: $reason")
+        println("El servicio MyHostApduService se desactiva: $reason")
     }
 }
