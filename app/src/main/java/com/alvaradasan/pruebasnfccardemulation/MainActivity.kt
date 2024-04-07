@@ -20,17 +20,29 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * Actividad principal de la aplicación. Solamente se crean los ViewModels necesarios para poder interactuar con la capa
+ * de negocio y la UI de la aplicación (simple implementación del patrón MVVM)
+ *
+ * @constructor Create empty constructor for MainActivity.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        /** Flujo utilizado para que NfcManager y CardEmulationManager puedan utilizar esta actividad para algunos de sus métodos */
         val flow : Flow<Activity> = flow { emit(this@MainActivity) }
+        /** Adaptador con la antena NFC utilizado para buscar dispositivos NFC reales o emulados  */
         val adapter = NfcAdapter.getDefaultAdapter(this)
+        /** Booleano atómico utilizado para que los ViewModel utilicen el adaptador y lo mantengan activo un rato después una lectura, sin que se produzcan colisiones */
         val requestedRead = AtomicBoolean(false)
 
+        /** Gestor de NFC utilizado para las herramientas NFC */
         val nfcManager = NfcManager(flow, adapter, requestedRead)
+        /** Gestor del lector NFC que soporta el protocolo APDU, para conectarse a uno de estos dispositivos emulados */
         val cardEmulationManager = CardEmulationManager(flow, adapter, requestedRead)
 
+        /** ViewModels creados, cada uno para su UI en específico */
         val nfcMainViewModel: NfcMainViewModel by viewModels { NfcMainViewModelFactory(nfcManager) }
         val nfcRWViewModel: NfcRWViewModel by viewModels { NfcRWViewModelFactory(nfcManager) }
         val cardEmulationAntennaViewModel : CardEmulationAntennaViewModel by viewModels { CardEmulationAntennaViewModelFactory(cardEmulationManager) }

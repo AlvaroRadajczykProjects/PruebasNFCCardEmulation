@@ -22,6 +22,11 @@ import androidx.navigation.NavController
 import com.alvaradasan.pruebasnfccardemulation.ui.theme.PruebasNFCCardEmulationTheme
 import com.alvaradasan.pruebasnfccardemulation.ui.view.Views
 
+/**
+ * Composables de la ventana de la UI de la ventana principal de emulacion de una tarjeta (o de su lectura con la antena del dispositivo)
+ * Estos composables no tienen niguna implementación de funcionalidad NFC/APDU
+ */
+
 @Composable
 fun CardEmulationMainView(navController : NavController?) {
     Scaffold(

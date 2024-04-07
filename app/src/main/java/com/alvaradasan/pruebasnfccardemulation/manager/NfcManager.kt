@@ -11,6 +11,7 @@ import android.nfc.tech.NdefFormatable
 import android.nfc.tech.NfcA
 import android.os.Bundle
 import android.util.Log
+import com.alvaradasan.pruebasnfccardemulation.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -22,15 +23,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedRead: AtomicBoolean) {
     companion object {
+        //Utilizado para saber cuándo una operación ha dado problemas o ha funcionado bien
         val ERROR = "ERROR"
     }
 
+    /** Adaptador de antena que es capaz de leer etiquetas NFC */
     private val adapter : NfcAdapter
+    /** Flujo para poder utilizar la actividad de esta aplicación */
     private val activityFlow : Flow<Activity>
+    /** Booleano utilizado para no interferir en la gestión de lectura hecha por otros subprocesos */
     val requestedRead : AtomicBoolean
 
+    /** Utilizado para gestión de subprocesos en segundo plano */
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    /** Utilizado para enviar resultados de acciones a otros subprocesos */
     private var resultStream: Channel<String>
+    /** Utilizado apra enviar resultados de lectura a otros subprocesos */
     private var writeDataStream: Channel<String>
 
     init {
@@ -41,14 +49,15 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         this.requestedRead = requestedRead
     }
 
-    fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
-
+    /**
+     * Callback que se encarga de gestionar la obtención de información de una etiqueta NFC
+     */
     private val getInfoCallback = NfcAdapter.ReaderCallback { tag ->
-        var res = "ID -> ${tag.id.toHex()};Technologies -> ${tag.techList.contentToString()};"
+        var res = "ID -> ${Utils.toHex(tag.id)};Technologies -> ${tag.techList.contentToString()};"
         tag.techList.forEach { tech ->
             if(tech == "android.nfc.tech.NfcA") {
                 val nfca = NfcA.get(tag)
-                res += "NfcA -> [SAK: ${nfca.sak}, ATQA: ${nfca.atqa.toHex()}, Timeout: ${nfca.timeout}, MaxTransceiveLength: ${nfca.maxTransceiveLength}];"
+                res += "NfcA -> [SAK: ${nfca.sak}, ATQA: ${Utils.toHex(nfca.atqa)}, Timeout: ${nfca.timeout}, MaxTransceiveLength: ${nfca.maxTransceiveLength}];"
             }
             if(tech == "android.nfc.tech.MifareClassic") {
                 val mf = MifareClassic.get(tag)
@@ -66,8 +75,9 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
                 val idp = IsoDep.get(tag)
                 res += "IsoDep -> [Timeout: ${idp.timeout}, MaxTransceiveLength: ${idp.maxTransceiveLength}, " +
                         "IsExtendedLengthApduSupported: ${idp.isExtendedLengthApduSupported}"
-                if(idp.historicalBytes != null) res += ", Historical bytes: ${idp.historicalBytes.toHex()}"
-                if(idp.hiLayerResponse != null) res += ", HiLayerResponse: ${idp.hiLayerResponse.toHex()}"
+                if(idp.historicalBytes != null) res += ", Historical bytes: ${Utils.toHex(idp.historicalBytes)}"
+                if(idp.hiLayerResponse != null) res += ", HiLayerResponse: ${
+                    com.alvaradasan.pruebasnfccardemulation.Utils.toHex(idp.hiLayerResponse)}"
                 res += "];"
             }
         }
@@ -76,6 +86,9 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         }
     }
 
+    /**
+     * Callback que se encarga de leer el contenido del primer registro de tipo texto que se encuentra en la etiqueta NFC (que soporte NDef)
+     */
     private val readNdefCallback = NfcAdapter.ReaderCallback { tag ->
         coroutineScope.launch {
             runCatching {
@@ -107,6 +120,9 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         }
     }
 
+    /**
+     * Callback que se utiliza para gestionar la sobreescritura del contenido del primer registro de la etiqueta NFC encontrada (que soporte NDef)
+     */
     private val writeNdefCallback = NfcAdapter.ReaderCallback { tag ->
         coroutineScope.launch {
             runCatching {
@@ -140,6 +156,9 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         }
     }
 
+    /**
+     * Callback que se encarga de gestionar el proceso de formateo de una etiqueta que soporte NdefFormatable, para que pueda soprtar Ndef
+     */
     private val formatToNdefCallback = NfcAdapter.ReaderCallback { tag ->
         coroutineScope.launch {
             runCatching {
@@ -168,27 +187,54 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         }
     }
 
+    /**
+     * Método que inicia la lectura de la información de una etiqueta NFC y devuelve el resultado del proceso
+     *
+     * @return [String] resultado del proceso, que será ERROR si falla, y cualquier otro en caso contrario
+     */
     suspend fun getInfoResult() : String {
         manageStartRead(getInfoCallback)
         return resultStream.receive()
     }
 
+    /**
+     * Método que inicia la lectura del primer registro de texto de una etiqueta NFC que soporte NDef, y devuelve su valor
+     *
+     * @return [String] datos que devuelve la etiqueta NFC con la cual se ha comunicado
+     */
     suspend fun readNdefData() : String {
         manageStartRead(readNdefCallback)
         return resultStream.receive()
     }
 
+    /**
+     * Método que inicia sobreescritura del contenido del primer regiestro de texto de una etiqueta NFC que soporte NDef,
+     * y devuelve el resultado de la ejecución
+     *
+     * @param data
+     * @return [String] resultado del proceso, que será ERROR si falla, y cualquier otro en caso contrario
+     */
     suspend fun writeNdefData(data: String): String {
         writeDataStream.send(data)
         manageStartRead(writeNdefCallback)
         return resultStream.receive()
     }
 
+    /**
+     * Format Ndef.
+     *
+     * @return [String] resultado del proceso, que será ERROR si falla, y cualquier otro en caso contrario
+     */
     suspend fun formatNdef() : String {
         manageStartRead(formatToNdefCallback)
         return resultStream.receive()
     }
 
+    /**
+     * Inicia la búsqueda de una etiqueta NFC, y en caso de encontrarla, llama a un callback pasado como argumento de tipo [NfcAdapter.ReaderCallback]
+     *
+     * @param callback Callback llamado en el caso de encontrar una etiqueta NFC
+     */
     private suspend fun manageStartRead( callback: NfcAdapter.ReaderCallback ) {
         runCatching {
             activityFlow.collect {
@@ -215,6 +261,9 @@ class NfcManager(activityFlow : Flow<Activity>, adapter : NfcAdapter, requestedR
         }
     }
 
+    /**
+     * Detiene la búsqueda de una etiqueta NFC
+     */
     suspend fun manageStopRead() {
         activityFlow.collect {
             println("Stopped reading (NFC antenna)")

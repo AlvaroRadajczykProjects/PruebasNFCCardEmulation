@@ -15,6 +15,11 @@ import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.cardemulation.CardEm
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcMainViewModel
 import com.alvaradasan.pruebasnfccardemulation.ui.viewmodel.nfc.NfcRWViewModel
 
+/**
+ * Enumeración con todas las ventanas de la UI a las cuales se puede navegar
+ *
+ * @constructor Create empty constructor for Views.
+ */
 enum class Views {
     MAIN,
     NFC_MAIN,
@@ -25,6 +30,11 @@ enum class Views {
     CARD_EMULATION_CARD,
     CARD_EMULATION_ANTENNA,
 }
+
+/**
+ * Composable que gestiona la navegación por el resto de composables de la UI
+ * Estos composables no tienen niguna implementación de funcionalidad NFC
+ */
 
 @Composable
 fun NavigationView(
